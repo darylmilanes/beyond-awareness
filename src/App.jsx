@@ -1,0 +1,446 @@
+import React, { useState, useEffect } from 'react';
+import { 
+    ArrowRight, 
+    ArrowLeft, 
+    Send, 
+    CheckCircle, 
+    AlertCircle, 
+    Menu, 
+    X, 
+    Info, 
+    Heart, 
+    Shield, 
+    Users, 
+    Lock, 
+    Briefcase, 
+    Baby, 
+    Globe, 
+    Sun 
+} from 'lucide-react';
+
+// --- DATA: The 9 Topics ---
+const topicsData = [
+    {
+        id: 1,
+        title: "HIV",
+        icon: <Heart size={32} />,
+        sub: "Beyond Clinical Facts",
+        description: "Moving from medical knowledge to behavioral commitment in treatment, relationships, and stigma reduction.",
+        content: [
+            { subtopic: "U=U Action Plan", focus: "Treatment Adherence", issue: "Inconsistency in medication & fear.", resolution: "Daily routines & transparent communication." },
+            { subtopic: "Serodiscordant Relationships", focus: "Mutual Safety", issue: "Anxiety & trust erosion.", resolution: "Affirmative disclosure & scientific trust." },
+            { subtopic: "Sterile Practice Commitment", focus: "Due Diligence", issue: "Complacency in non-medical settings.", resolution: "The 'Check First' Habit." },
+            { subtopic: "PrEP/PEP Adherence", focus: "Habit Formation", issue: "Forgetfulness.", resolution: "Personalized Prevention Protocol." },
+            { subtopic: "Challenging Stigma", focus: "Intervention Scripts", issue: "Silence during prejudiced talk.", resolution: "Respectful Intervention techniques." }
+        ]
+    },
+    {
+        id: 2,
+        title: "Bullying",
+        icon: <Shield size={32} />,
+        sub: "Beyond Telling an Adult",
+        description: "Shifting from passive reporting to proactive intervention, de-escalation, and restorative justice.",
+        content: [
+            { subtopic: "Bystander-to-Upstander", focus: "Proactive Intervention", issue: "Freezing in the moment.", resolution: "Tiered Intervention Flowchart." },
+            { subtopic: "Cyberbullying Protocol", focus: "Reporting & Blocking", issue: "Emotional engagement.", resolution: "The Evidence Habit." },
+            { subtopic: "De-escalation", focus: "Non-Aggressive Comm", issue: "Fueling the bully.", resolution: "The 'Kill the Joke' Technique." },
+            { subtopic: "Restorative Justice", focus: "Repairing Harm", issue: "Focusing only on punishment.", resolution: "Structured Accountability." },
+            { subtopic: "Adult Misinterpretation", focus: "Targeting Recognition", issue: "Dismissing as 'teasing'.", resolution: "Power Imbalance Assessment." }
+        ]
+    },
+    {
+        id: 3,
+        title: "Artificial Intelligence",
+        icon: <Briefcase size={32} />, 
+        sub: "Beyond the Hype",
+        description: "Moving from fear or excitement to ethical integration, verification, and human skill preservation.",
+        content: [
+            { subtopic: "Counteracting AI Bias", focus: "Identifying Flaws", issue: "Blind faith in algorithms.", resolution: "The Algorithmic Skeptic." },
+            { subtopic: "Prompt Engineering", focus: "Advanced Techniques", issue: "Generic outputs.", resolution: "Mastering Context." },
+            { subtopic: "Verification Checklist", focus: "Cross-Checking", issue: "Spreading misinformation.", resolution: "The Fact-Check Trigger." },
+            { subtopic: "Maintaining Human Skills", focus: "Deliberate Practice", issue: "Skill atrophy.", resolution: "The Non-Automatable Schedule." },
+            { subtopic: "Ethical Usage Policy", focus: "Citation Rules", issue: "Academic/Pro dishonesty.", resolution: "Transparency Protocol." }
+        ]
+    },
+    {
+        id: 4,
+        title: "Social Responsibility",
+        icon: <Users size={32} />,
+        sub: "Beyond Empathy",
+        description: "Translating feelings of empathy into conscious language, privilege recognition, and structural support.",
+        content: [
+            { subtopic: "Microaggression Script", focus: "Immediate Intervention", issue: "Letting bias slide.", resolution: "The Gentle Challenge." },
+            { subtopic: "Identity Language", focus: "Self-Correction", issue: "Fear of offending.", resolution: "The Pause-and-Ask." },
+            { subtopic: "Privilege to Advocacy", focus: "Using Social Capital", issue: "Passive acknowledgment.", resolution: "The Amplifier Habit." },
+            { subtopic: "Accessibility Review", focus: "Proactive Standards", issue: "Afterthought compliance.", resolution: "The Inclusive Default." },
+            { subtopic: "Appropriation vs Appreciation", focus: "Ethical Engagement", issue: "Trivializing culture.", resolution: "The Informed Context Check." }
+        ]
+    },
+    {
+        id: 5,
+        title: "Online Accountability",
+        icon: <Lock size={32} />,
+        sub: "Beyond the Block Button",
+        description: "Establishing digital reputation, ethical footprints, and constructive online citizenship.",
+        content: [
+            { subtopic: "Five-Second Post Pause", focus: "Future Impact", issue: "Emotional posting.", resolution: "The Digital Career Filter." },
+            { subtopic: "Data Privacy Audit", focus: "Permission Review", issue: "Digital complacency.", resolution: "The Quarterly Checkup." },
+            { subtopic: "Professional Brand", focus: "Content Curation", issue: "Messy online identity.", resolution: "The Public Curate Habit." },
+            { subtopic: "Responsible Reporting", focus: "Utilizing Tools", issue: "Ignoring toxicity.", resolution: "The Enforcement Mindset." },
+            { subtopic: "Taming Trolls", focus: "Strategic Disengagement", issue: "Feeding negativity.", resolution: "The Disengagement Rule." }
+        ]
+    },
+    {
+        id: 6,
+        title: "Workplace Comm.",
+        icon: <Briefcase size={32} />,
+        sub: "Beyond Email",
+        description: "Optimizing efficiency, clarity, conflict management, and documentation habits.",
+        content: [
+            { subtopic: "Asynchronous Mastery", focus: "Reducing Noise", issue: "Notification fatigue.", resolution: "The Priority Protocol." },
+            { subtopic: "Constructive Feedback", focus: "Delivery Standards", issue: "Vague criticism.", resolution: "The SBI Model." },
+            { subtopic: "Professional Docs", focus: "Logging Decisions", issue: "Information silos.", resolution: "The Shared Record Habit." },
+            { subtopic: "Decision Meetings", focus: "Outcome Setting", issue: "Aimless meetings.", resolution: "The Agenda Mandate." },
+            { subtopic: "Email Efficiency", focus: "Subject Line Protocol", issue: "Vague emails.", resolution: "The Action Tag." }
+        ]
+    },
+    {
+        id: 7,
+        title: "Parenting Next Gen",
+        icon: <Baby size={32} />,
+        sub: "Beyond Discipline",
+        description: "Fostering resilience, emotional regulation, and independent critical thought.",
+        content: [
+            { subtopic: "Emotional Regulation", focus: "Modeling Processing", issue: "Suppressing emotion.", resolution: "The 5-Step Pause." },
+            { subtopic: "Digital Citizenship", focus: "Co-Viewing", issue: "Fear of tech.", resolution: "The Co-Engagement Habit." },
+            { subtopic: "Growth Mindset", focus: "Responding to Failure", issue: "Outcome focus.", resolution: "The Learning Language." },
+            { subtopic: "Family Conflict", focus: "Resolution Routine", issue: "Avoidance/Yelling.", resolution: "The Shared Table Rule." },
+            { subtopic: "Critical Thinking", focus: "Encouraging Inquiry", issue: "Reliance on authority.", resolution: "The Counter-Question Habit." }
+        ]
+    },
+    {
+        id: 8,
+        title: "Social Ethics",
+        icon: <Globe size={32} />,
+        sub: "Beyond Courtesy",
+        description: "Civic responsibility, respectful use of shared resources, and consideration for others.",
+        content: [
+            { subtopic: "Noise Pollution", focus: "Shared Silence", issue: "Disregard for comfort.", resolution: "The Silent Zone Trigger." },
+            { subtopic: "Public Cleanliness", focus: "Zero Trace", issue: "Littering.", resolution: "The 'Hold It' Protocol." },
+            { subtopic: "Personal Space", focus: "Reducing Footprint", issue: "Space hogging.", resolution: "The Transit Huddle." },
+            { subtopic: "Queue Respect", focus: "Fair Waiting", issue: "Cutting lines.", resolution: "The Order Commitment." },
+            { subtopic: "Resource Hogs", focus: "Responsible Sharing", issue: "Hoarding assets.", resolution: "The Next Person Mindset." }
+        ]
+    },
+    {
+        id: 9,
+        title: "Spiritual Salvation",
+        icon: <Sun size={32} />,
+        sub: "Beyond Belief",
+        description: "Translating faith into ethical action, self-discipline, and genuine compassion.",
+        content: [
+            { subtopic: "Sunday-Only Gap", focus: "Integrity Practice", issue: "Compartmentalization.", resolution: "The Daily Ethical Audit." },
+            { subtopic: "Forgiveness as Verb", focus: "Releasing Resentment", issue: "Hidden bitterness.", resolution: "Resentment Release Protocol." },
+            { subtopic: "Belief to Action", focus: "Active Service", issue: "Passive charity.", resolution: "Non-Negotiable Service Calendar." },
+            { subtopic: "Avoiding Superiority", focus: "Humility", issue: "Judgment.", resolution: "Affirming Common Humanity." },
+            { subtopic: "Sustained Practice", focus: "Discipline", issue: "Emotional reliance.", resolution: "Daily Adherence Accountability." }
+        ]
+    }
+];
+
+// --- COMPONENTS ---
+
+const Hero = ({ onExplore }) => (
+    <div className="bg-[#004080] text-white pt-24 pb-16 px-6 rounded-b-[3rem] shadow-xl relative overflow-hidden">
+        <div className="absolute top-0 right-0 opacity-10 transform translate-x-12 -translate-y-12">
+             <Sun size={200} />
+        </div>
+        <div className="max-w-md mx-auto text-center relative z-10">
+            <h1 className="text-4xl font-extrabold mb-2 tracking-tight">Beyond Awareness</h1>
+            <div className="h-1 w-24 bg-[#FACC15] mx-auto mb-4 rounded-full"></div>
+            <p className="text-xl font-light text-blue-100 italic mb-8">"Where Understanding Becomes Behavior"</p>
+            <p className="text-sm text-blue-200 mb-8 leading-relaxed">
+                True change doesn't happen when we just know better. It happens when we do better. Explore the 9 pillars of behavioral transformation.
+            </p>
+            <button 
+                onClick={onExplore}
+                className="bg-[#FACC15] text-[#004080] font-bold py-3 px-8 rounded-full shadow-lg hover:bg-white transition-all transform hover:scale-105 flex items-center mx-auto gap-2"
+            >
+                Start the Journey <ArrowRight size={20} />
+            </button>
+        </div>
+    </div>
+);
+
+const TopicCard = ({ topic, onClick }) => (
+    <div 
+        onClick={() => onClick(topic)}
+        className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-xl hover:border-blue-200 transition-all cursor-pointer group flex flex-col items-center text-center h-full"
+    >
+        <div className="bg-blue-50 text-[#004080] p-4 rounded-full mb-4 group-hover:bg-[#004080] group-hover:text-[#FACC15] transition-colors">
+            {topic.icon}
+        </div>
+        <h3 className="font-bold text-lg text-[#474747] mb-1">{topic.title}</h3>
+        <p className="text-xs font-semibold text-[#004080] uppercase tracking-wider mb-2">{topic.sub}</p>
+        <p className="text-sm text-gray-500 line-clamp-2">{topic.description}</p>
+    </div>
+);
+
+const TopicDetail = ({ topic, onBack }) => {
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, []);
+
+    return (
+        <div className="min-h-screen bg-[#fafeff] pb-20 font-sans">
+            {/* Sticky Header for Detail View */}
+            <div className="sticky top-0 bg-white/90 backdrop-blur-md z-50 border-b border-gray-200 px-4 py-4 flex items-center justify-between shadow-sm">
+                <button onClick={onBack} className="p-2 hover:bg-gray-100 rounded-full text-[#474747]">
+                    <ArrowLeft size={24} />
+                </button>
+                <h2 className="font-bold text-lg text-[#004080]">{topic.title}</h2>
+                <div className="w-8"></div> {/* Spacer for centering */}
+            </div>
+
+            <div className="max-w-2xl mx-auto px-6 pt-8">
+                <div className="mb-8 text-center">
+                    <div className="inline-block p-4 bg-[#004080] rounded-2xl text-[#FACC15] mb-4 shadow-lg">
+                        {topic.icon}
+                    </div>
+                    <h1 className="text-3xl font-extrabold text-[#474747] mb-2">{topic.title}</h1>
+                    <p className="text-[#004080] font-semibold text-lg mb-4">{topic.sub}</p>
+                    <p className="text-gray-600 leading-relaxed">{topic.description}</p>
+                </div>
+
+                <div className="space-y-6">
+                    {topic.content.map((item, idx) => (
+                        <div key={idx} className="bg-white rounded-xl shadow-md border border-[#004080] overflow-hidden">
+                            <div className="p-5">
+                                <h3 className="text-lg font-bold text-[#474747] mb-3">{item.subtopic}</h3>
+                                
+                                <div className="grid gap-3 text-sm">
+                                    <div className="flex gap-3 items-start">
+                                        <AlertCircle size={18} className="text-red-500 shrink-0 mt-0.5" />
+                                        <div>
+                                            <span className="font-semibold text-gray-700 block">The Issue:</span>
+                                            <span className="text-gray-500">{item.issue}</span>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex gap-3 items-start">
+                                        <Info size={18} className="text-blue-500 shrink-0 mt-0.5" />
+                                        <div>
+                                            <span className="font-semibold text-gray-700 block">Behavioral Focus:</span>
+                                            <span className="text-gray-500">{item.focus}</span>
+                                        </div>
+                                    </div>
+
+                                    <div className="mt-2 bg-blue-50 p-3 rounded-lg flex gap-3 items-start">
+                                        <CheckCircle size={18} className="text-green-600 shrink-0 mt-0.5" />
+                                        <div>
+                                            <span className="font-bold text-[#004080] block">Moving Beyond:</span>
+                                            <span className="text-gray-700 font-medium">{item.resolution}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+                
+                <div className="mt-12 p-6 bg-gray-100 rounded-xl text-center">
+                    <p className="text-gray-500 text-sm">Content skeleton loaded. Full modules coming soon.</p>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const ContactForm = () => {
+    // *** REPLACE THIS URL WITH YOUR DEPLOYED GOOGLE APPS SCRIPT URL ***
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqerSGLjAxYYKVPO8sXEV59zvqOomFFkEFPk-QmIhkF3Ac3y5Vv2YF6PBGXe2-0Kn72A/exec"; 
+    
+    const [formData, setFormData] = useState({
+        name: '',
+        message: '',
+        mobile: '',
+        email: ''
+    });
+    const [status, setStatus] = useState('idle'); // idle, submitting, success, error
+
+    const handleChange = (e) => {
+        setFormData({...formData, [e.target.name]: e.target.value});
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setStatus('submitting');
+        
+        // Construct payload
+        const formPayload = new FormData();
+        formPayload.append('Name', formData.name);
+        formPayload.append('Message', formData.message);
+        formPayload.append('Mobile', formData.mobile);
+        formPayload.append('Email', formData.email);
+
+        try {
+            // For demo purposes, we are simulating success if no URL is provided yet
+            if (SCRIPT_URL.includes("PLACEHOLDER")) {
+                setTimeout(() => setStatus('success'), 1500);
+                return;
+            }
+
+            await fetch(SCRIPT_URL, { method: 'POST', body: formPayload });
+            setStatus('success');
+            setFormData({ name: '', message: '', mobile: '', email: '' });
+        } catch (error) {
+            console.error('Error!', error.message);
+            setStatus('error');
+        }
+    };
+
+    return (
+        <div id="contact" className="bg-[#474747] text-white py-16 px-6">
+            <div className="max-w-md mx-auto">
+                <h2 className="text-2xl font-bold mb-2 flex items-center gap-2">
+                    <span className="text-[#FACC15]">Connect</span> with Us
+                </h2>
+                <p className="text-gray-400 mb-8 text-sm">Share your thoughts or join the movement.</p>
+
+                {status === 'success' ? (
+                    <div className="bg-green-600/20 border border-green-500 p-6 rounded-xl text-center animate-fade-in">
+                        <CheckCircle size={48} className="mx-auto text-green-400 mb-4" />
+                        <h3 className="font-bold text-lg">Message Received!</h3>
+                        <p className="text-sm text-gray-300">Thank you for going beyond awareness.</p>
+                        <button onClick={() => setStatus('idle')} className="mt-4 text-xs underline hover:text-white">Send another</button>
+                    </div>
+                ) : (
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                        <div>
+                            <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Message *</label>
+                            <textarea 
+                                name="message" 
+                                required 
+                                rows="4"
+                                value={formData.message}
+                                onChange={handleChange}
+                                className="w-full bg-gray-600 border-none rounded-lg p-3 text-white placeholder-gray-400 focus:ring-2 focus:ring-[#FACC15] outline-none"
+                                placeholder="How will you change your behavior?"
+                            ></textarea>
+                        </div>
+
+                        <div className="grid grid-cols-1 gap-4">
+                            <div>
+                                <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Name (Optional)</label>
+                                <input 
+                                    type="text" 
+                                    name="name" 
+                                    value={formData.name}
+                                    onChange={handleChange}
+                                    className="w-full bg-gray-600 border-none rounded-lg p-3 text-white focus:ring-2 focus:ring-[#FACC15] outline-none"
+                                />
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Mobile</label>
+                                    <input 
+                                        type="tel" 
+                                        name="mobile" 
+                                        value={formData.mobile}
+                                        onChange={handleChange}
+                                        className="w-full bg-gray-600 border-none rounded-lg p-3 text-white focus:ring-2 focus:ring-[#FACC15] outline-none"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Email</label>
+                                    <input 
+                                        type="email" 
+                                        name="email" 
+                                        value={formData.email}
+                                        onChange={handleChange}
+                                        className="w-full bg-gray-600 border-none rounded-lg p-3 text-white focus:ring-2 focus:ring-[#FACC15] outline-none"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        <button 
+                            type="submit" 
+                            disabled={status === 'submitting'}
+                            className="w-full bg-[#FACC15] text-[#004080] font-bold py-3 rounded-lg hover:bg-white transition-colors mt-4 flex justify-center items-center gap-2"
+                        >
+                            {status === 'submitting' ? 'Sending...' : 'Send Message'} 
+                            {status !== 'submitting' && <Send size={18} />}
+                        </button>
+                        {status === 'error' && <p className="text-red-400 text-xs text-center">Something went wrong. Please try again.</p>}
+                    </form>
+                )}
+            </div>
+        </div>
+    );
+};
+
+export default function App() {
+    const [currentView, setCurrentView] = useState('home'); // 'home' or topicId
+    const [selectedTopic, setSelectedTopic] = useState(null);
+
+    const handleTopicClick = (topic) => {
+        setSelectedTopic(topic);
+        setCurrentView('topic');
+    };
+
+    const handleBack = () => {
+        setSelectedTopic(null);
+        setCurrentView('home');
+    };
+
+    const scrollToTopics = () => {
+        const el = document.getElementById('topics-grid');
+        if (el) el.scrollIntoView({ behavior: 'smooth' });
+    };
+
+    // Main Render Logic
+    if (currentView === 'topic' && selectedTopic) {
+        return <TopicDetail topic={selectedTopic} onBack={handleBack} />;
+    }
+
+    return (
+        <div className="min-h-screen flex flex-col font-sans bg-[#fafeff]">
+            {/* Navigation Bar */}
+            <nav className="flex justify-between items-center p-6 bg-[#004080] text-white sticky top-0 z-50 shadow-md">
+                <div className="font-extrabold text-xl tracking-tighter flex items-center gap-3">
+                    <div className="w-10 h-10 bg-[#FACC15] rounded-xl flex items-center justify-center shadow-lg transform hover:scale-105 transition-transform">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="5" y="14" width="4" height="6" rx="1" fill="#004080" />
+                            <rect x="11" y="10" width="4" height="10" rx="1" fill="#004080" />
+                            <rect x="17" y="4" width="4" height="16" rx="1" fill="#004080" />
+                        </svg>
+                    </div>
+                    Beyond Awareness
+                </div>
+                <a href="#contact" className="text-sm font-semibold hover:text-[#FACC15] transition-colors">Contact</a>
+            </nav>
+
+            <Hero onExplore={scrollToTopics} />
+
+            <div id="topics-grid" className="flex-grow max-w-5xl mx-auto px-6 py-16">
+                <div className="text-center mb-12">
+                    <h2 className="text-[#004080] font-bold uppercase tracking-widest text-sm mb-2">The Framework</h2>
+                    <h3 className="text-3xl font-bold text-[#474747]">9 Pillars of Change</h3>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {topicsData.map(topic => (
+                        <TopicCard key={topic.id} topic={topic} onClick={handleTopicClick} />
+                    ))}
+                </div>
+            </div>
+
+            <ContactForm />
+
+            <footer className="bg-[#333] text-gray-500 text-center py-8 text-xs">
+                <p>&copy; 2025 Beyond Awareness. All Rights Reserved.</p>
+            </footer>
+        </div>
+    );
+}
